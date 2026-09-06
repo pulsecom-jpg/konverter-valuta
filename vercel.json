@@ -1,11 +1,1 @@
-{
-  "cleanUrls": true,
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {"key": "Permissions-Policy", "value": "camera=(self)"}
-      ]
-    }
-  ]
-}
+{"cleanUrls":true,"headers":[{"source":"/(.*)","headers":[{"key":"Permissions-Policy","value":"camera=(self)"}]},{"source":"/service-worker.js","headers":[{"key":"Cache-Control","value":"no-cache"}]}]}

@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b1220">
+<link rel="manifest" href="/manifest.webmanifest">
 <title>PriceLens • DKK/EUR/KM</title>
 <style>
 :root{--bg:#07101d;--card:#101b2d;--text:#f8fafc;--muted:#9fb0c7;--accent:#5eead4;--line:#23324a}
@@ -139,6 +140,9 @@ try{
  if(z){EUR_USD=z.EUR_USD||EUR_USD;EUR_SEK=z.EUR_SEK||EUR_SEK;EUR_HUF=z.EUR_HUF||EUR_HUF;EUR_RSD=z.EUR_RSD||EUR_RSD;}
 }catch(_){}
 camera().then(()=>refreshRates());
+if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js');}
+window.addEventListener('offline',()=>statusEl.textContent='OFFLINE — kamera/OCR rade sa spremljenim resursima; koristim zadnje kurseve.');
+window.addEventListener('online',()=>{statusEl.textContent='Online — osvježavam kurseve.';refreshRates();});
 </script>
 </body>
 </html>

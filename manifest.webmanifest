@@ -1,0 +1,8 @@
+{
+  "name": "PriceLens",
+  "short_name": "PriceLens",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07101d",
+  "theme_color": "#0b1220"
+}
