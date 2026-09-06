@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="bs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1220">
+<title>PriceLens • DKK/EUR/KM</title>
+<style>
+:root{--bg:#07101d;--card:#101b2d;--text:#f8fafc;--muted:#9fb0c7;--accent:#5eead4;--line:#23324a}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+.app{min-height:100dvh;display:flex;flex-direction:column}.top{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
+.brand{font-weight:800;letter-spacing:.2px}.badge{font-size:12px;color:var(--muted)}
+.camera{position:relative;flex:1;min-height:48dvh;background:#020617;overflow:hidden}
+video{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.guide{position:absolute;left:8%;right:8%;top:35%;height:24%;border:2px solid var(--accent);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.25)}
+.hint{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:13px;text-shadow:0 1px 4px #000}
+.panel{padding:16px;background:linear-gradient(180deg,#0b1525,#07101d)}
+.row{display:flex;gap:10px}.row>*{flex:1}
+select,input,button{width:100%;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);padding:13px;font-size:16px}
+button{font-weight:750;cursor:pointer}.primary{background:var(--accent);color:#042f2e;border:none}
+.result{margin-top:12px;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
+.src{font-size:14px;color:var(--muted)} .big{font-size:34px;font-weight:900;margin:5px 0}.secondary{font-size:20px;font-weight:700}
+.status{font-size:12px;color:var(--muted);margin-top:10px;min-height:16px}
+.manual{margin-top:12px}.small{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.35}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top"><div class="brand">PriceLens</div><div class="badge">DKK • EUR • SEK • RSD • HUF • USD • KM</div></div>
+  <div class="camera">
+    <video id="video" autoplay playsinline muted></video>
+    <div class="guide"></div>
+    <div class="hint">Usmjeri okvir prema cijeni</div>
+  </div>
+  <div class="panel">
+    <div class="row">
+      <select id="from">
+        <option value="DKK">DKK — Danska kruna</option>
+        <option value="EUR">EUR — Euro</option>
+        <option value="SEK">SEK — Švedska kruna</option>
+        <option value="RSD">RSD — Srpski dinar</option>
+        <option value="HUF">HUF — Mađarska forinta</option>
+        <option value="USD">USD — Američki dolar</option>
+      </select>
+      <button class="primary" id="scan">Prepoznaj sada</button>
+    </div>
+    <div class="result">
+      <div class="src" id="recognized">Prepoznata cijena: —</div>
+      <div class="big" id="eur">— €</div>
+      <div class="secondary" id="bam">— KM</div>
+    </div>
+    <div class="manual">
+      <div class="row">
+        <input id="manual" inputmode="decimal" placeholder="Ručni unos, npr. 799">
+        <button id="convert">Preračunaj</button>
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button id="auto">Auto skeniranje: UKLJUČENO</button>
+      <button id="live">Osvježi kurseve</button>
+    </div>
+    <div class="status" id="status">Pokretanje kamere…</div>
+    <div class="small">EUR → KM koristi fiksni kurs 1 EUR = 1,95583 KM. DKK → EUR koristi centralni ERM II paritet. SEK, RSD, HUF i USD se pri pokretanju pokušavaju automatski osvježiti preko interneta; ako nema veze, koriste se posljednji spremljeni kursevi.</div>
+  </div>
+</div>
+<canvas id="canvas" hidden></canvas>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<script>
+const EUR_BAM=1.95583, EUR_DKK=7.46038;
+// Orijentacioni kursevi za v2; u finalnoj online verziji spojiti na live FX API.
+let EUR_SEK=10.70, EUR_RSD=117.20, EUR_HUF=393.0, EUR_USD=1.17;
+const v=document.querySelector('#video'), statusEl=document.querySelector('#status');
+async function camera(){
+ try{
+  const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
+  v.srcObject=s; statusEl.textContent='Kamera spremna.';
+ }catch(e){statusEl.textContent='Kamera nije dostupna. Dozvoli pristup kameri ili koristi ručni unos.'}
+}
+function parsePrice(text){
+ const hits=(text.match(/\d{1,4}(?:[.,]\d{1,2})?/g)||[]).map(x=>parseFloat(x.replace(',','.'))).filter(Number.isFinite);
+ return hits.length?Math.max(...hits):null;
+}
+function show(x){
+ const f=document.querySelector('#from').value;
+ let eur;
+ if(f==='EUR') eur=x;
+ else if(f==='DKK') eur=x/EUR_DKK;
+ else if(f==='SEK') eur=x/EUR_SEK;
+ else if(f==='RSD') eur=x/EUR_RSD;
+ else if(f==='HUF') eur=x/EUR_HUF;
+ else if(f==='USD') eur=x/EUR_USD;
+ document.querySelector('#recognized').textContent=`Prepoznata cijena: ${x.toLocaleString('bs-BA',{maximumFractionDigits:2})} ${f}`;
+ document.querySelector('#eur').textContent=eur.toLocaleString('bs-BA',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+ document.querySelector('#bam').textContent=(eur*EUR_BAM).toLocaleString('bs-BA',{minimumFractionDigits:2,maximumFractionDigits:2})+' KM';
+}
+document.querySelector('#convert').onclick=()=>{let x=parseFloat(document.querySelector('#manual').value.replace(',','.'));if(Number.isFinite(x))show(x)}
+let busy=false, autoOn=true;
+async function doScan(){
+ if(busy||!v.videoWidth)return;
+ busy=true; statusEl.textContent='Čitam cijenu…';
+ const c=document.querySelector('#canvas'),ctx=c.getContext('2d');
+ const sw=Math.floor(v.videoWidth*.84), sh=Math.floor(v.videoHeight*.24), sx=Math.floor(v.videoWidth*.08), sy=Math.floor(v.videoHeight*.35);
+ c.width=sw;c.height=sh;ctx.drawImage(v,sx,sy,sw,sh,0,0,sw,sh);
+ try{
+  const r=await Tesseract.recognize(c,'eng');
+  const p=parsePrice(r.data.text);
+  if(p!==null){show(p);statusEl.textContent='Cijena automatski prepoznata.'}
+  else statusEl.textContent='Tražim cijenu u okviru…';
+ }catch(e){statusEl.textContent='OCR nije dostupan. Provjeri internet vezu.'}
+ busy=false;
+}
+document.querySelector('#scan').onclick=doScan;
+document.querySelector('#auto').onclick=()=>{
+ autoOn=!autoOn;
+ document.querySelector('#auto').textContent='Auto skeniranje: '+(autoOn?'UKLJUČENO':'ISKLJUČENO');
+};
+setInterval(()=>{if(autoOn)doScan()},3000);
+
+async function refreshRates(){
+ const b=document.querySelector('#live'); b.textContent='Osvježavam…';
+ try{
+  const r=await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD,SEK,HUF');
+  if(!r.ok)throw new Error();
+  const j=await r.json();
+  EUR_USD=j.rates.USD||EUR_USD; EUR_SEK=j.rates.SEK||EUR_SEK; EUR_HUF=j.rates.HUF||EUR_HUF;
+  // Frankfurter ne daje uvijek RSD; pokušaj poseban javni endpoint.
+  try{
+   const rr=await fetch('https://open.er-api.com/v6/latest/EUR'); const jj=await rr.json();
+   if(jj.rates&&jj.rates.RSD) EUR_RSD=jj.rates.RSD;
+  }catch(_){}
+  localStorage.setItem('plRates',JSON.stringify({EUR_USD,EUR_SEK,EUR_HUF,EUR_RSD,ts:Date.now()}));
+  statusEl.textContent='Live kursevi osvježeni.';
+ }catch(e){statusEl.textContent='Live kurs trenutno nije dostupan; koristim posljednje spremljene kurseve.'}
+ b.textContent='Osvježi kurseve';
+}
+document.querySelector('#live').onclick=refreshRates;
+try{
+ const z=JSON.parse(localStorage.getItem('plRates')||'null');
+ if(z){EUR_USD=z.EUR_USD||EUR_USD;EUR_SEK=z.EUR_SEK||EUR_SEK;EUR_HUF=z.EUR_HUF||EUR_HUF;EUR_RSD=z.EUR_RSD||EUR_RSD;}
+}catch(_){}
+camera().then(()=>refreshRates());
+</script>
+</body>
+</html>
