@@ -12,7 +12,7 @@
 .brand{font-weight:800;letter-spacing:.2px}.badge{font-size:12px;color:var(--muted)}
 .camera{position:relative;flex:1;min-height:48dvh;background:#020617;overflow:hidden}
 video{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.guide{position:absolute;left:8%;right:8%;top:35%;height:24%;border:2px solid var(--accent);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.25)}
+.guide{position:absolute;left:3%;right:3%;top:20%;height:55%;border:2px solid var(--accent);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.25)}
 .hint{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:13px;text-shadow:0 1px 4px #000}
 .panel{padding:16px;background:linear-gradient(180deg,#0b1525,#07101d)}
 .row{display:flex;gap:10px}.row>*{flex:1}
@@ -99,7 +99,7 @@ async function doScan(){
  if(busy||!v.videoWidth)return;
  busy=true; statusEl.textContent='Čitam cijenu…';
  const c=document.querySelector('#canvas'),ctx=c.getContext('2d');
- const sw=Math.floor(v.videoWidth*.84), sh=Math.floor(v.videoHeight*.24), sx=Math.floor(v.videoWidth*.08), sy=Math.floor(v.videoHeight*.35);
+ const sw=Math.floor(v.videoWidth*.94), sh=Math.floor(v.videoHeight*.55), sx=Math.floor(v.videoWidth*.03), sy=Math.floor(v.videoHeight*.20);
  c.width=sw;c.height=sh;ctx.drawImage(v,sx,sy,sw,sh,0,0,sw,sh);
  try{
   const r=await Tesseract.recognize(c,'eng');
