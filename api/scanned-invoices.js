@@ -20,7 +20,8 @@ function cleanJson(s){
   return JSON.parse(s);
 }
 async function analyzeAttachment(att){
-  const client = new OpenAI({apiKey:process.env.OPENAI_API_KEY});
+  if(!process.env.OPEN_KEY && !process.env.OPENAI_API_KEY) throw new Error("Nedostaje OpenAI API ključ (OPEN_KEY).");
+  const client = new OpenAI({apiKey:process.env.OPEN_KEY || process.env.OPENAI_API_KEY});
   const mime=att.contentType||"application/pdf";
   const data=`data:${mime};base64,${att.content.toString("base64")}`;
   const content=[{type:"input_text",text:`Očitaj ulaznu fakturu. Vrati ISKLJUČIVO validan JSON:
