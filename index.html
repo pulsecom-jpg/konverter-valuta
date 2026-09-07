@@ -1,148 +1,511 @@
 <!doctype html>
-<html lang="bs">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#0b1220">
-<link rel="manifest" href="/manifest.webmanifest">
-<title>PriceLens • DKK/EUR/KM</title>
-<style>
-:root{--bg:#07101d;--card:#101b2d;--text:#f8fafc;--muted:#9fb0c7;--accent:#5eead4;--line:#23324a}
-*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
-.app{min-height:100dvh;display:flex;flex-direction:column}.top{padding:14px 16px;display:flex;align-items:center;justify-content:space-between}
-.brand{font-weight:800;letter-spacing:.2px}.badge{font-size:12px;color:var(--muted)}
-.camera{position:relative;flex:1;min-height:48dvh;background:#020617;overflow:hidden}
-video{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.guide{position:absolute;left:3%;right:3%;top:20%;height:55%;border:2px solid var(--accent);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.25)}
-.hint{position:absolute;left:0;right:0;bottom:18px;text-align:center;font-size:13px;text-shadow:0 1px 4px #000}
-.panel{padding:16px;background:linear-gradient(180deg,#0b1525,#07101d)}
-.row{display:flex;gap:10px}.row>*{flex:1}
-select,input,button{width:100%;border:1px solid var(--line);border-radius:14px;background:var(--card);color:var(--text);padding:13px;font-size:16px}
-button{font-weight:750;cursor:pointer}.primary{background:var(--accent);color:#042f2e;border:none}
-.result{margin-top:12px;padding:18px;border:1px solid var(--line);border-radius:18px;background:var(--card)}
-.src{font-size:14px;color:var(--muted)} .big{font-size:34px;font-weight:900;margin:5px 0}.secondary{font-size:20px;font-weight:700}
-.status{font-size:12px;color:var(--muted);margin-top:10px;min-height:16px}
-.manual{margin-top:12px}.small{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.35}
-</style>
-</head>
-<body>
-<div class="app">
-  <div class="top"><div class="brand">PriceLens</div><div class="badge">DKK • EUR • SEK • RSD • HUF • USD • KM</div></div>
-  <div class="camera">
-    <video id="video" autoplay playsinline muted></video>
-    <div class="guide"></div>
-    <div class="hint">Usmjeri okvir prema cijeni</div>
-  </div>
-  <div class="panel">
-    <div class="row">
-      <select id="from">
-        <option value="DKK">DKK — Danska kruna</option>
-        <option value="EUR">EUR — Euro</option>
-        <option value="SEK">SEK — Švedska kruna</option>
-        <option value="RSD">RSD — Srpski dinar</option>
-        <option value="HUF">HUF — Mađarska forinta</option>
-        <option value="USD">USD — Američki dolar</option>
-      </select>
-      <button class="primary" id="scan">Prepoznaj sada</button>
-    </div>
-    <div class="result">
-      <div class="src" id="recognized">Prepoznata cijena: —</div>
-      <div class="big" id="eur">— €</div>
-      <div class="secondary" id="bam">— KM</div>
-    </div>
-    <div class="manual">
-      <div class="row">
-        <input id="manual" inputmode="decimal" placeholder="Ručni unos, npr. 799">
-        <button id="convert">Preračunaj</button>
-      </div>
-    </div>
-    <div class="row" style="margin-top:10px">
-      <button id="auto">Auto skeniranje: UKLJUČENO</button>
-      <button id="live">Osvježi kurseve</button>
-    </div>
-    <div class="status" id="status">Pokretanje kamere…</div>
-    <div class="small">EUR → KM koristi fiksni kurs 1 EUR = 1,95583 KM. DKK → EUR koristi centralni ERM II paritet. SEK, RSD, HUF i USD se pri pokretanju pokušavaju automatski osvježiti preko interneta; ako nema veze, koriste se posljednji spremljeni kursevi.</div>
+<!-- SA Investment build: VERIFIED-item-save-v3 + PROFESSIONAL-UI-2026-08-29 --><html lang='bs'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>SA Investment | Fakture</title><style>
+:root{font-family:Inter,system-ui,sans-serif;color:#18202b;background:#f4f6f8}*{box-sizing:border-box}body{margin:0}.top{background:#102b4e;color:white;padding:20px 5%;display:flex;justify-content:space-between;align-items:center}.top h1{margin:0;font-size:22px}.top small{opacity:.75}.wrap{max-width:1200px;margin:auto;padding:24px}.cards{display:grid;grid-template-columns:repeat(5,1fr);gap:14px}.card,.panel{background:white;border-radius:16px;padding:18px;box-shadow:0 3px 15px #0000000b}.card b{font-size:25px;display:block;margin-top:8px}.danger{color:#c62828}.warn{color:#d97706}.ok{color:#18864b}.actions{display:flex;gap:10px;margin:20px 0;flex-wrap:wrap}button,.filebtn{border:0;border-radius:10px;padding:12px 16px;font-weight:700;cursor:pointer}.primary{background:#1769e0;color:white}.secondary{background:white;color:#1769e0;border:1px solid #cbd8eb}.filebtn input{display:none}table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:13px 9px;border-bottom:1px solid #edf0f3;font-size:14px}th{color:#697586;font-size:12px}.badge{padding:5px 9px;border-radius:99px;font-size:12px;font-weight:700}.bdanger{background:#fde8e8;color:#b42318}.bok{background:#e7f6ed;color:#18794e}.bwait{background:#fff3db;color:#9a6700}.modal{display:none;position:fixed;inset:0;background:#0007;align-items:center;justify-content:center;padding:16px}.modal.on{display:flex}.box{background:white;border-radius:18px;padding:22px;width:min(650px,100%);max-height:92vh;overflow:auto}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}label{font-size:12px;font-weight:700;color:#586474}input,select{width:100%;padding:11px;border:1px solid #d6dce4;border-radius:9px;margin-top:5px}.right{text-align:right}.empty{padding:25px;text-align:center;color:#7b8491}.preview{max-width:100%;max-height:200px;border-radius:10px;margin-top:10px}.note{font-size:12px;color:#6c7684;margin-top:8px}.filters{display:grid;grid-template-columns:2fr 1fr 1fr 1fr auto;gap:10px;align-items:end;margin:14px 0 18px}.filters label{display:block}.filter-summary{font-size:13px;color:#697586;margin:-5px 0 12px}.tabs{display:flex;gap:8px;margin:22px 0 12px}.tab{background:#e8eef6;color:#36506f}.tab.active{background:#102b4e;color:#fff}.model-card{display:flex;justify-content:space-between;gap:16px;align-items:center;padding:14px 0;border-bottom:1px solid #edf0f3}.model-card:last-child{border-bottom:0}.qty{font-size:22px;font-weight:800}.mini{font-size:12px;color:#697586}.drill{display:none;background:#f8fafc}.drill.on{display:table-row}.itemtable td{padding:8px;font-size:13px}.clickable{cursor:pointer;color:#1769e0;font-weight:700}@media(max-width:800px){.filters{grid-template-columns:1fr 1fr}}@media(max-width:460px){.filters{grid-template-columns:1fr}}@media(max-width:800px){.cards{grid-template-columns:1fr 1fr}.grid{grid-template-columns:1fr}.panel{overflow:auto}.wrap{padding:14px}.top{padding:16px}.top h1{font-size:18px}}@media(max-width:460px){.cards{grid-template-columns:1fr}}
+.kpi-click{cursor:pointer}.kpi-click.active{outline:2px solid #1769e0}.quick-panel{display:none;margin:14px 0}.quick-panel.on{display:block}.supplier-grid{display:flex;flex-direction:column;gap:10px}.supplier-card{border:1px solid #e5eaf0;border-radius:14px;padding:16px;cursor:pointer}.supplier-detail{display:none;margin-top:12px;padding-top:12px;border-top:1px solid #eee}.supplier-detail.on{display:block}.supplier-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.statmini{background:#f7f9fc;border-radius:9px;padding:9px}.statmini b{display:block;margin-top:4px}@media(max-width:700px){.supplier-stats{grid-template-columns:1fr 1fr}}
+.searchbar{margin:18px 0}.searchbar input{font-size:16px;padding:14px}
+.month-panel{margin:16px 0}.month-controls{display:flex;gap:10px;align-items:end;flex-wrap:wrap}
+.history{display:none;margin-top:10px;padding:12px;background:#f8fafc;border-radius:10px}.history.on{display:block}
+.model-card{cursor:pointer}.model-card:hover{background:#fafbfd}
+@media(max-width:700px){.month-controls{display:grid;grid-template-columns:1fr 1fr}}
+.edit-tabs{display:flex;gap:8px;margin:4px 0 18px}.edit-tab{background:#e8eef6;color:#36506f}.edit-tab.active{background:#102b4e;color:#fff}
+.edit-page{display:none}.edit-page.active{display:block}.item-edit-row{display:grid;grid-template-columns:1fr 2fr .7fr 1fr 1fr auto;gap:8px;align-items:end;padding:10px 0;border-bottom:1px solid #edf0f3}
+.item-edit-row input{margin-top:4px}.item-edit-actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:14px;flex-wrap:wrap}
+.item-check{margin-top:12px;padding:12px;border-radius:10px;background:#f8fafc}.item-check.warncheck{background:#fff3db;color:#9a6700}.item-check.okcheck{background:#e7f6ed;color:#18794e}
+@media(max-width:800px){.item-edit-row{grid-template-columns:1fr 1fr}.item-edit-row .item-name{grid-column:1/-1}.item-edit-row .item-delete{grid-column:1/-1}}
+/* PROFESSIONAL UI - DESIGN ONLY */
+:root{--navy:#062b57;--blue:#1769e0;--line:#e2e8f0;--muted:#64748b;--surface:#fff;--shadow:0 8px 28px rgba(15,35,65,.07)}
+body{background:#f4f7fb;color:#10213a}.top{background:linear-gradient(105deg,#05264d,#07366b);padding:18px max(22px,4%);min-height:78px;box-shadow:0 3px 18px #062b5726;position:sticky;top:0;z-index:20}.top>div:first-child{display:flex;align-items:center;gap:13px}.top>div:first-child:before{content:"SA";display:grid;place-items:center;width:43px;height:43px;border:1px solid #ffffff80;border-radius:10px;font-size:20px;font-weight:800}.top h1{font-size:20px;letter-spacing:.02em;text-transform:uppercase}.top small{display:block;font-size:10px;letter-spacing:.17em;text-transform:uppercase}.wrap{max-width:1480px;padding:28px 30px 44px}.card,.panel{border:1px solid #e4eaf2;border-radius:12px;box-shadow:var(--shadow)}.cards{gap:16px}.cards>.card{position:relative;min-height:112px;padding:20px;color:#64748b;font-size:13px;font-weight:600}.cards>.card:before{content:"";position:absolute;left:0;top:19px;bottom:19px;width:3px;border-radius:3px;background:#1769e0}.cards>.card b{font-size:24px;color:#10213a}.kpi-click{transition:.15s}.kpi-click:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(15,35,65,.11)}.kpi-click.active{outline:0;border-color:#1769e0;box-shadow:0 0 0 3px #1769e01a}.actions{gap:9px;margin:18px 0}button,.filebtn{border-radius:8px;padding:10px 14px;font-size:13px}.primary{background:#1263d6;box-shadow:0 5px 12px #1769e026}.secondary{border:1px solid #d7e0eb;background:#fff;color:#234b7b}.searchbar input{height:48px;background:#fff;border-color:#dce4ee;border-radius:9px;box-shadow:0 2px 8px #0f23410a}input,select{border-color:#d8e0ea;border-radius:8px;background:#fff;color:#10213a;outline:none}input:focus,select:focus{border-color:#5794e8;box-shadow:0 0 0 3px #1769e014}label{color:#526278;font-size:11px}.panel{padding:20px 22px}.panel h2{font-size:17px}.month-panel>.cards>.card{min-height:92px}.month-panel>.cards>.card b{font-size:20px}.tabs{border-bottom:1px solid #dfe6ef;gap:4px}.tab{background:transparent;color:#64748b;border-radius:7px 7px 0 0}.tab.active{background:#0a376b;color:#fff}.filters{background:#f8fafc;border:1px solid #e7edf4;border-radius:10px;padding:14px}th{background:#f8fafc;color:#64748b;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:12px 10px}td{padding:12px 10px;color:#26374d}.clickable{color:#0963d8}.bok{background:#eaf8ef;color:#178447}.bwait{background:#fff4e5;color:#c56b00}.bdanger{background:#fff0f0;color:#cf2c2c}.supplier-card{background:#fff;border-color:#e3e9f1;border-radius:10px}.statmini{background:#f6f9fc;border:1px solid #e7edf4;border-radius:8px}.modal{background:#06172e99;backdrop-filter:blur(4px)}.box{border-radius:14px;border:1px solid #dfe6ef;box-shadow:0 24px 70px #06172e42;padding:26px}.edit-tabs{border-bottom:1px solid #e2e8f0}.edit-tab{background:transparent;color:#607086}.edit-tab.active{background:#0a376b;color:#fff}#loginGate{background:linear-gradient(145deg,#f5f8fc,#eaf1f9)!important}#loginGate .card{padding:30px!important;border-radius:14px!important;box-shadow:0 24px 60px #0a2f5c1c!important}#loginGate .card:before{content:"SA";display:grid;place-items:center;width:52px;height:52px;background:#07366b;color:white;border-radius:11px;font-size:22px;margin-bottom:18px}
+@media(max-width:900px){.wrap{padding:18px 14px 34px}.top{padding:14px 16px;min-height:68px}.cards{grid-template-columns:repeat(2,1fr)}.cards>.card{min-height:98px;padding:16px}.panel{padding:16px}}
+@media(max-width:560px){.wrap{padding:13px 10px 28px}.cards{gap:9px}.cards>.card{min-height:88px;padding:14px 12px;font-size:11px}.cards>.card b{font-size:17px}.panel{border-radius:10px;padding:13px}.filters{grid-template-columns:1fr!important}.box{padding:17px 14px}.edit-tabs{overflow:auto}}
+
+
+/* ===== SCANNED INVOICES ===== */
+.scan-inbox{display:none;margin:18px 0}.scan-inbox.on{display:block}
+.scan-head{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.scan-list{display:flex;flex-direction:column;gap:9px}
+.scan-row{display:grid;grid-template-columns:1.6fr .8fr .9fr auto;gap:12px;align-items:center;padding:14px 15px;border:1px solid #e3e9f1;border-radius:10px;background:#fff}
+.scan-row:hover{border-color:#bfd1e7;background:#fbfdff}
+.scan-badge{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 6px;margin-left:5px;border-radius:99px;background:#eef5ff;color:#1263d6;font-size:11px;font-weight:800}
+.scan-state{font-size:11px;font-weight:800;padding:5px 9px;border-radius:99px;background:#fff4e5;color:#b86500}
+.scan-ready{background:#eaf8ef;color:#178447}.scan-error{background:#fff0f0;color:#c62828}
+@media(max-width:760px){.scan-row{grid-template-columns:1fr 1fr}.scan-row .scan-main,.scan-row .scan-action{grid-column:1/-1}}
+
+</style></head><body>
+<div id='loginGate' style='position:fixed;inset:0;background:#f4f6f8;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px'>
+  <div class='card' style='width:min(420px,100%)'>
+    <h2 style='margin-top:0'>SA Investment</h2><p class='mini'>Prijava za pregled faktura</p>
+    <label>Email<input id='loginEmail' type='email' autocomplete='email'></label>
+    <label style='display:block;margin-top:10px'>Lozinka<input id='loginPassword' type='password' autocomplete='current-password'></label>
+    <div class='actions'><button class='primary' onclick='signIn()'>Prijavi se</button><button class='secondary' onclick='signUp()'>Prva registracija</button></div>
+    <div id='loginMsg' class='note'></div>
   </div>
 </div>
-<canvas id="canvas" hidden></canvas>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<header class='top'><div><h1>SA Investment</h1><small>Fakture & plaćanja</small></div><div id='today'></div></header><main class='wrap'><section class='cards'><div class='card kpi-click' id='kpi-unpaid' onclick="toggleQuick('unpaid')">Neplaćeno ukupno<b id='unpaid'>0,00 KM</b></div><div class='card kpi-click' id='kpi-overdue' onclick="toggleQuick('overdue')">Dospjelo<b class='danger' id='overdue'>0,00 KM</b></div><div class='card kpi-click' id='kpi-week' onclick="toggleQuick('week')">Narednih 7 dana<b class='warn' id='week'>0,00 KM</b></div><div class='card kpi-click' id='kpi-paid' onclick="toggleQuick('paid')">Plaćeno<b class='ok' id='paid'>0,00 KM</b></div><div class='card kpi-click' id='kpi-month' onclick="toggleQuick('month')">Narednih 30 dana<b class='warn' id='month30'>0,00 KM</b></div></section><div class='actions'><button class='primary' onclick='loadFromSupabase()'>↻ Osvježi podatke</button><button class='secondary' onclick='signOut()'>Odjava</button><label class='filebtn primary' >📷 Uslikaj / učitaj račun<input id='scan' type='file' accept='image/*,application/pdf' capture='environment'></label><button class='secondary' onclick='openForm()'>+ Ručni unos</button>
+<button class='secondary' onclick='toggleScanInbox()'>🖨 Skenirane fakture <span class='scan-badge' id='scanInboxCount'>0</span></button></div>
+<section class='panel scan-inbox' id='scanInboxPanel'>
+  <div class='scan-head'>
+    <div><h2 style='margin:0'>Skenirane fakture</h2><div class='mini'>Canon → email → AI. Pregledaj prije spremanja u bazu.</div></div>
+    <button class='secondary' onclick='loadScannedInvoices()'>↻ Osvježi</button>
+  </div>
+  <div id='scanInboxList' class='scan-list'><div class='empty'>Nema učitanih skenova.</div></div>
+</section>
+<div class='searchbar'><input id='globalSearch' placeholder='🔎 Pretraži dobavljača, broj fakture, model ili šifru artikla...' oninput='applyGlobalSearch()'></div><section class='panel' id='searchResultsPanel' style='display:none;margin-bottom:16px'><div style='display:flex;justify-content:space-between;align-items:center;gap:10px'><h2 style='margin:0'>Rezultati pretrage</h2><button class='secondary' onclick='clearGlobalSearch()'>Očisti</button></div><div id='searchResults' style='margin-top:10px'></div></section>
+<section class='panel month-panel'>
+<div class='month-controls'><label>Mjesec<input id='monthPick' type='month' onchange='renderMonthly()'></label><button class='secondary' onclick="document.getElementById('monthPick').value='';renderMonthly()">Svi mjeseci</button></div>
+<div class='cards' style='margin-top:14px'><div class='card'>Fakturisano<b id='mTotal'>0,00 KM</b></div><div class='card'>Plaćeno<b class='ok' id='mPaid'>0,00 KM</b></div><div class='card'>Neplaćeno<b id='mUnpaid'>0,00 KM</b></div><div class='card'>Dospjelo<b class='danger' id='mOverdue'>0,00 KM</b></div><div class='card'>PDV<b id='mVat'>0,00 KM</b></div></div>
+<div id='monthSuppliers' style='margin-top:12px'></div></section>
+<section class='panel quick-panel' id='quickPanel'><div style='display:flex;justify-content:space-between'><h2 id='quickTitle' style='margin:0'>Pregled</h2><button class='secondary' onclick='closeQuick()'>Zatvori</button></div><div id='quickList'></div></section><section class='panel' style='margin-bottom:18px'><h2 style='margin:0'>Dobavljači</h2><div class='mini'>Klikni dobavljača za dugovanja i njegove fakture.</div><div id='supplierGrid' class='supplier-grid' style='margin-top:14px'></div></section><div class='tabs'><button class='tab active' id='tabInv' onclick="showTab('inv')">Fakture</button><button class='tab' id='tabArt' onclick="showTab('art')">Naručeni artikli</button></div><section class='panel' id='articlePanel' style='display:none'><h2 style='margin-top:0'>Naručeni artikli</h2><div class='filters' style='grid-template-columns:1.4fr 1.4fr 1fr 1fr auto'><label>Dobavljač<select id='itemSupplier' onchange='renderItems()'><option value=''>Svi dobavljači</option></select></label><label>Pretraži model / šifru<input id='itemSearch' placeholder='npr. ACP-12CH35AERI' oninput='renderItems()'></label><label>Od<input id='itemFrom' type='date' onchange='renderItems()'></label><label>Do<input id='itemTo' type='date' onchange='renderItems()'></label><button class='secondary' onclick="$('itemSupplier').value='';$('itemSearch').value='';$('itemFrom').value='';$('itemTo').value='';renderItems()">Očisti</button></div><section class='cards' style='margin-bottom:16px'><div class='card'>Ukupno komada<b id='itemQty'>0</b></div><div class='card'>Različitih modela<b id='itemModels'>0</b></div><div class='card'>Faktura sa artiklima<b id='itemInvoices'>0</b></div><div class='card'>Vrijednost faktura<b id='itemValue'>0,00 KM</b></div></section><div id='modelList'></div></section><section class='panel' id='invoicePanel'><h2 style='margin-top:0'>Računi</h2><div class='filters'><label>Dobavljač<select id='filterSupplier' onchange='render()'><option value=''>Svi dobavljači</option></select></label><label>Status<select id='filterStatus' onchange='render()'><option value=''>Svi statusi</option><option>Neplaćeno</option><option>Dospjelo</option><option>Plaćeno</option><option>Djelimično</option></select></label><label>Od<input id='filterFrom' type='date' onchange='render()'></label><label>Do<input id='filterTo' type='date' onchange='render()'></label><button class='secondary' onclick='clearFilters()'>Očisti filtere</button></div><div class='filter-summary' id='filterSummary'></div><table><thead><tr><th>DOBAVLJAČ</th><th>BR. RAČUNA</th><th>DATUM</th><th>DOSPIJEĆE</th><th>BEZ PDV</th><th>PDV</th><th>UKUPNO</th><th>STATUS</th><th></th></tr></thead><tbody id='rows'></tbody></table><div id='bottomTotals' style='display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:18px'><div class='card'>Ukupno dospjelo<b class='danger' id='bottomOverdue'>0,00 KM</b></div><div class='card'>Ukupni dug<b id='bottomDebt'>0,00 KM</b></div></div></section></main>
+<div class='modal' id='modal'><div class='box' style='width:min(900px,100%)'>
+<div style='display:flex;justify-content:space-between;align-items:center;gap:12px'><h2 id='formtitle'>Novi račun</h2><button onclick='closeForm()'>✕</button></div>
+<div class='edit-tabs'><button type='button' class='edit-tab active' id='editTabInvoice' onclick="showEditPage('invoice')">Podaci računa</button><button type='button' class='edit-tab' id='editTabItems' onclick="showEditPage('items')">Stavke računa <span id='editItemCount'></span></button></div>
+<div id='editPageInvoice' class='edit-page active'>
+<img id='preview' class='preview' style='display:none'><div class='note' id='scanNote'></div><div id='aiProgress' style='display:none;margin:12px 0;padding:14px;border-radius:10px;background:#eef5ff;color:#174ea6;font-weight:700'>✨ AI analizira račun…</div>
+<div class='grid'><div><label>Dobavljač
+<div style='position:relative'>
+<input id='supplier' autocomplete='off' placeholder='Počni upisivati naziv...' oninput='showSupplierSuggestions()' onfocus='showSupplierSuggestions()'>
+<div id='supplierSuggestions' style='display:none;position:absolute;z-index:30;left:0;right:0;top:100%;background:white;border:1px solid #d6dce4;border-radius:9px;box-shadow:0 8px 20px #0002;max-height:220px;overflow:auto'></div>
+</div>
+</label></div><div><label>Broj računa<input id='number'></label></div><div><label>Datum fakture<input id='date' type='date'></label></div><div><label>Rok dospijeća<input id='due' type='date'></label></div><div><label>Iznos bez PDV-a<input id='net' type='number' step='.01' oninput='calculateVat17()'></label></div><div><label>PDV<input id='vat' type='number' step='.01'></label></div><div><label>Ukupno<input id='total' type='number' step='.01'></label></div><div><label>Status<select id='status'><option>Neplaćeno</option><option>Plaćeno</option><option>Djelimično</option></select></label></div></div>
+<div class='actions right'><button class='secondary' onclick='closeForm()'>Odustani</button><button class='secondary' type='button' onclick="showEditPage('items')">Stavke računa →</button><button class='primary' onclick='saveInvoice()'>Spremi račun</button></div>
+</div>
+<div id='editPageItems' class='edit-page'>
+<div class='mini' style='margin-bottom:10px'>Ispravi šifru, naziv/model, količinu ili cijenu koju je AI pogrešno očitao. Možeš dodati ili izbrisati stavku.</div>
+<div id='editItemsList'></div>
+<div class='item-edit-actions'><button type='button' class='secondary' onclick='addEditItem()'>+ Dodaj stavku</button><div><b>Zbir stavki: <span id='editItemsTotal'>0,00 KM</span></b></div></div>
+<div id='editItemsCheck' class='item-check'></div>
+<div class='actions right'><button class='secondary' type='button' onclick="showEditPage('invoice')">← Podaci računa</button><button class='primary' onclick='saveInvoice()'>Spremi račun</button></div>
+</div>
+</div></div>
 <script>
-const EUR_BAM=1.95583, EUR_DKK=7.46038;
-// Orijentacioni kursevi za v2; u finalnoj online verziji spojiti na live FX API.
-let EUR_SEK=10.70, EUR_RSD=117.20, EUR_HUF=393.0, EUR_USD=1.17;
-const v=document.querySelector('#video'), statusEl=document.querySelector('#status');
-async function camera(){
- try{
-  const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}},audio:false});
-  v.srcObject=s; statusEl.textContent='Kamera spremna.';
- }catch(e){statusEl.textContent='Kamera nije dostupna. Dozvoli pristup kameri ili koristi ručni unos.'}
-}
-function parsePrice(text){
- const hits=(text.match(/\d{1,4}(?:[.,]\d{1,2})?/g)||[]).map(x=>parseFloat(x.replace(',','.'))).filter(Number.isFinite);
- return hits.length?Math.max(...hits):null;
-}
-function show(x){
- const f=document.querySelector('#from').value;
- let eur;
- if(f==='EUR') eur=x;
- else if(f==='DKK') eur=x/EUR_DKK;
- else if(f==='SEK') eur=x/EUR_SEK;
- else if(f==='RSD') eur=x/EUR_RSD;
- else if(f==='HUF') eur=x/EUR_HUF;
- else if(f==='USD') eur=x/EUR_USD;
- document.querySelector('#recognized').textContent=`Prepoznata cijena: ${x.toLocaleString('bs-BA',{maximumFractionDigits:2})} ${f}`;
- document.querySelector('#eur').textContent=eur.toLocaleString('bs-BA',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
- document.querySelector('#bam').textContent=(eur*EUR_BAM).toLocaleString('bs-BA',{minimumFractionDigits:2,maximumFractionDigits:2})+' KM';
-}
-document.querySelector('#convert').onclick=()=>{let x=parseFloat(document.querySelector('#manual').value.replace(',','.'));if(Number.isFinite(x))show(x)}
-let busy=false, autoOn=true;
-async function doScan(){
- if(busy||!v.videoWidth)return;
- busy=true; statusEl.textContent='Čitam cijenu…';
- const c=document.querySelector('#canvas'),ctx=c.getContext('2d');
- const sw=Math.floor(v.videoWidth*.94), sh=Math.floor(v.videoHeight*.55), sx=Math.floor(v.videoWidth*.03), sy=Math.floor(v.videoHeight*.20);
- c.width=sw;c.height=sh;ctx.drawImage(v,sx,sy,sw,sh,0,0,sw,sh);
- try{
-  const r=await Tesseract.recognize(c,'eng');
-  const p=parsePrice(r.data.text);
-  if(p!==null){show(p);statusEl.textContent='Cijena automatski prepoznata.'}
-  else statusEl.textContent='Tražim cijenu u okviru…';
- }catch(e){statusEl.textContent='OCR nije dostupan. Provjeri internet vezu.'}
- busy=false;
-}
-document.querySelector('#scan').onclick=doScan;
-document.querySelector('#auto').onclick=()=>{
- autoOn=!autoOn;
- document.querySelector('#auto').textContent='Auto skeniranje: '+(autoOn?'UKLJUČENO':'ISKLJUČENO');
-};
-setInterval(()=>{if(autoOn)doScan()},3000);
+const SUPABASE_URL='https://skazwbxgenuyehpbcugr.supabase.co';
+const SUPABASE_KEY='sb_publishable_4n0YKSL9MNWgIcjaTpQ2tg_zSf_5nGj';
+const SESSION_KEY='sa_supabase_session_v1';
+let invoices=[];
+let editing=null;
+function getSession(){try{return JSON.parse(localStorage.getItem(SESSION_KEY)||'null')}catch(e){return null}}
+function setSession(x){if(x)localStorage.setItem(SESSION_KEY,JSON.stringify(x));else localStorage.removeItem(SESSION_KEY)}
+async function refreshSession(){let sess=getSession();if(!sess?.refresh_token)throw new Error('Sesija je istekla. Prijavi se ponovo.');let r=await fetch(SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:sess.refresh_token})});let j=await r.json();if(!r.ok)throw new Error(j.message||j.error_description||'Sesija je istekla. Prijavi se ponovo.');setSession(j);return j}
+async function authFetch(url,options={}){let sess=getSession();if(!sess?.access_token)throw new Error('Nisi prijavljen.');options.headers={...(options.headers||{}),'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sess.access_token};let r=await fetch(url,options);if(r.status===401){let txt=await r.clone().text().catch(()=>'');if(/jwt expired|expired/i.test(txt)){sess=await refreshSession();options.headers={...(options.headers||{}),'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sess.access_token};r=await fetch(url,options)}}return r}
 
-async function refreshRates(){
- const b=document.querySelector('#live'); b.textContent='Osvježavam…';
- try{
-  const r=await fetch('https://api.frankfurter.app/latest?from=EUR&to=USD,SEK,HUF');
-  if(!r.ok)throw new Error();
-  const j=await r.json();
-  EUR_USD=j.rates.USD||EUR_USD; EUR_SEK=j.rates.SEK||EUR_SEK; EUR_HUF=j.rates.HUF||EUR_HUF;
-  // Frankfurter ne daje uvijek RSD; pokušaj poseban javni endpoint.
-  try{
-   const rr=await fetch('https://open.er-api.com/v6/latest/EUR'); const jj=await rr.json();
-   if(jj.rates&&jj.rates.RSD) EUR_RSD=jj.rates.RSD;
-  }catch(_){}
-  localStorage.setItem('plRates',JSON.stringify({EUR_USD,EUR_SEK,EUR_HUF,EUR_RSD,ts:Date.now()}));
-  statusEl.textContent='Live kursevi osvježeni.';
- }catch(e){statusEl.textContent='Live kurs trenutno nije dostupan; koristim posljednje spremljene kurseve.'}
- b.textContent='Osvježi kurseve';
+async function authRequest(path,body){
+  let r=await fetch(SUPABASE_URL+'/auth/v1/'+path,{method:'POST',headers:{'apikey':SUPABASE_KEY,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  let j=await r.json(); if(!r.ok)throw new Error(j.msg||j.message||j.error_description||'Greška prijave'); return j;
 }
-document.querySelector('#live').onclick=refreshRates;
+async function signIn(){
+  try{let j=await authRequest('token?grant_type=password',{email:$('loginEmail').value,password:$('loginPassword').value});setSession(j);$('loginGate').style.display='none';await loadFromSupabase();}
+  catch(e){$('loginMsg').textContent=e.message}
+}
+async function signUp(){
+  try{let j=await authRequest('signup',{email:$('loginEmail').value,password:$('loginPassword').value});
+  $('loginMsg').textContent=j.access_token?'Registracija uspješna. Učitavam podatke…':'Registracija poslana. Ako je potvrda emaila uključena, potvrdi email pa se prijavi.';
+  if(j.access_token){setSession(j);$('loginGate').style.display='none';await loadFromSupabase();}}
+  catch(e){$('loginMsg').textContent=e.message}
+}
+function signOut(){setSession(null);invoices=[];$('loginGate').style.display='flex';render()}
+async function apiGet(path){
+  let sess=getSession(); if(!sess?.access_token)throw new Error('Nisi prijavljen.');
+  let r=await authFetch(SUPABASE_URL+'/rest/v1/'+path);
+  if(r.status===401){signOut();throw new Error('Sesija je istekla. Prijavi se ponovo.')} let j=await r.json(); if(!r.ok)throw new Error(j.message||'Greška baze'); return j;
+}
+async function loadFromSupabase(){
+  try{
+    let [sup,inv,it]=await Promise.all([apiGet('suppliers?select=id,name'),apiGet('invoices?select=*'),apiGet('invoice_items?select=*')]);
+    let sm=Object.fromEntries(sup.map(x=>[x.id,x.name])), im={};
+    it.forEach(x=>{(im[x.invoice_id]??=[]).push({id:x.id,code:x.product_code||'',model:x.product_name||'',qty:Number(x.quantity||0),unitPrice:Number(x.unit_price||0),itemTotal:Number(x.total_amount||0)})});
+    invoices=inv.map(x=>({id:x.id,supplier:sm[x.supplier_id]||'Nepoznat dobavljač',number:x.invoice_number||'',date:x.invoice_date||'',due:x.due_date||'',net:Number(x.net_amount||0),vat:Number(x.vat_amount||0),total:Number(x.total_amount||0),status:x.status==='placeno'?'Plaćeno':x.status==='djelimicno'?'Djelimično':'Neplaćeno',imageUrl:x.image_url||'',items:im[x.id]||[]}));
+    render(); if($('articlePanel').style.display!=='none')renderItems();
+  }catch(e){alert(e.message)}
+}
+const $=id=>document.getElementById(id), money=n=>Number(n||0).toLocaleString('bs-BA',{minimumFractionDigits:2,maximumFractionDigits:2})+' KM'; $('today').textContent=formatDateObj(new Date());
+function persist(){render()} function daydiff(d){let a=new Date();a.setHours(0,0,0,0);return Math.ceil((new Date(d)-a)/86400000)}
+
+function supplierNames(){
+  return [...new Set(invoices.map(x=>x.supplier).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'bs'));
+}
+function escHtml(v){return String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function showSupplierSuggestions(){
+  let box=$('supplierSuggestions'),input=$('supplier');if(!box||!input)return;
+  let q=input.value.trim().toLocaleLowerCase('bs');
+  let names=supplierNames().filter(n=>!q||n.toLocaleLowerCase('bs').includes(q)).slice(0,12);
+  if(!names.length){box.style.display='none';box.innerHTML='';return}
+  box.innerHTML=names.map(n=>`<button type="button" style="display:block;width:100%;text-align:left;background:white;border:0;border-bottom:1px solid #edf0f3;border-radius:0;padding:12px" data-supplier="${escHtml(n)}">${escHtml(n)}</button>`).join('');
+  box.querySelectorAll('button').forEach(b=>b.addEventListener('pointerdown',ev=>{ev.preventDefault();selectSupplier(b.dataset.supplier)}));
+  box.style.display='block';
+}
+function selectSupplier(name){$('supplier').value=name;$('supplierSuggestions').style.display='none'}
+function refreshSupplierSuggestions(){if(document.activeElement===$('supplier'))showSupplierSuggestions()}
+
+document.addEventListener('pointerdown',e=>{let b=$('supplierSuggestions'),i=$('supplier');if(b&&i&&e.target!==i&&!b.contains(e.target))b.style.display='none'});
+function refreshSupplierFilter(){let sel=$('filterSupplier'),current=sel.value;let names=[...new Set(invoices.map(x=>x.supplier).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'bs'));sel.innerHTML="<option value=''>Svi dobavljači</option>"+names.map(n=>`<option value="${n.replace(/"/g,'&quot;')}">${n}</option>`).join('');sel.value=current}
+let globalQuery='';
+function invoiceMatchesGlobal(x){
+  if(!globalQuery)return true;
+  let hay=[x.supplier,x.number,x.date,x.due,...(x.items||[]).flatMap(i=>[i.code,i.model])].join(' ').toLocaleLowerCase('bs');
+  return hay.includes(globalQuery);
+}
+function applyGlobalSearch(){
+  globalQuery=($('globalSearch')?.value||'').trim().toLocaleLowerCase('bs');
+  renderSearchResults();
+}
+function clearGlobalSearch(){
+  globalQuery='';if($('globalSearch'))$('globalSearch').value='';
+  $('searchResultsPanel').style.display='none';$('searchResults').innerHTML='';
+}
+function renderSearchResults(){
+  let panel=$('searchResultsPanel'),box=$('searchResults');
+  if(!globalQuery){panel.style.display='none';box.innerHTML='';return}
+  let matches=invoices.filter(invoiceMatchesGlobal).sort((a,b)=>a.supplier.localeCompare(b.supplier,'bs')||(a.due||'').localeCompare(b.due||''));
+  let itemMatches=[];
+  invoices.forEach(x=>(x.items||[]).forEach(i=>{
+    let hay=[i.code,i.model,x.supplier,x.number].join(' ').toLocaleLowerCase('bs');
+    if(hay.includes(globalQuery))itemMatches.push({invoice:x,item:i});
+  }));
+  let invHtml=matches.length?`<table><thead><tr><th>DOBAVLJAČ</th><th>RAČUN</th><th>DOSPIJEĆE</th><th>UKUPNO</th><th>STATUS</th></tr></thead><tbody>${matches.map(x=>`<tr><td><b>${x.supplier}</b></td><td><span class="clickable" onclick="openSearchInvoice(${x.id})">${x.number}</span></td><td>${fmt(x.due)}</td><td><b>${money(x.total)}</b></td><td><span class="badge ${deadlineInfo(x).cls}">${deadlineInfo(x).text}</span></td></tr>`).join('')}</tbody></table>`:'';
+  let artHtml=itemMatches.length?`<div style="margin-top:14px"><b>Pronađeni artikli</b>${itemMatches.map(z=>`<div class="model-card"><div><b>${z.item.model||z.item.code||'Artikal'}</b><div class="mini">Šifra: ${z.item.code||'—'} · ${z.invoice.supplier} · Faktura ${z.invoice.number}</div></div><div class="qty">${z.item.qty||0}</div></div>`).join('')}</div>`:'';
+  box.innerHTML=invHtml+artHtml||'<div class="empty">Nema rezultata za ovu pretragu.</div>';
+  panel.style.display='block';
+}
+function openSearchInvoice(id){
+  let x=invoices.find(a=>a.id===id);if(!x)return;
+  $('searchResults').innerHTML=`<div><button class="secondary" onclick="renderSearchResults()">← Nazad na rezultate</button></div><div style="margin-top:12px"><h3>${x.supplier} · ${x.number}</h3><div class="supplier-stats"><div class="statmini">Datum<b>${fmt(x.date)}</b></div><div class="statmini">Dospijeće<b>${fmt(x.due)}</b></div><div class="statmini">Ukupno<b>${money(x.total)}</b></div><div class="statmini">Status<b class="${deadlineInfo(x).cls==='bdanger'?'danger':'ok'}">${deadlineInfo(x).text}</b></div></div>${itemDetail(x)}</div>`;
+  $('searchResultsPanel').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function deadlineInfo(x){
+  if(x.status==='Plaćeno') return {text:'Plaćeno',cls:'bok'};
+  let d=daydiff(x.due);
+  if(d<0) return {text:'Kasni '+Math.abs(d)+' '+(Math.abs(d)===1?'dan':'dana'),cls:'bdanger'};
+  if(d===0) return {text:'Dospijeva danas',cls:'bwait'};
+  return {text:'Još '+d+' '+(d===1?'dan':'dana'),cls:'bok'};
+}
+function paymentButtonLabel(x){return x.status==='Plaćeno'?'↩ Poništi plaćanje':'✓ Označi plaćeno'}
+
+function filteredInvoices(){let supplier=$('filterSupplier').value,status=$('filterStatus').value,from=$('filterFrom').value,to=$('filterTo').value;return invoices.filter(x=>{let dd=daydiff(x.due),displayStatus=x.status==='Plaćeno'?'Plaćeno':dd<0?'Dospjelo':x.status;return(!supplier||x.supplier===supplier)&&(!status||displayStatus===status)&&(!from||x.date>=from)&&(!to||x.date<=to)})}
+function clearFilters(){$('filterSupplier').value='';$('filterStatus').value='';$('filterFrom').value='';$('filterTo').value='';render()}
+function render(){refreshSupplierFilter();refreshSupplierSuggestions();let u=0,o=0,w=0,p=0,m30=0;const r=$('rows');r.innerHTML='';let list=filteredInvoices().slice().sort((a,b)=>a.due.localeCompare(b.due));list.forEach(x=>{let paid=x.status==='Plaćeno',dd=daydiff(x.due);if(paid)p+=+x.total;else{u+=+x.total;if(dd<0)o+=+x.total;if(dd>=0&&dd<=7)w+=+x.total;if(dd>=0&&dd<=30)m30+=+x.total}let di=deadlineInfo(x),cls=di.cls,label=di.text;r.innerHTML+=`<tr><td><b>${x.supplier}</b></td><td><span class='clickable' onclick='toggleDrill(${x.id})'>${x.number}</span></td><td>${fmt(x.date)}</td><td>${fmt(x.due)}</td><td>${money(x.net)}</td><td>${money(x.vat)}</td><td><b>${money(x.total)}</b></td><td><span class='badge ${cls}'>${label}</span></td><td><button onclick='togglePaid(${x.id})'>${paymentButtonLabel(x)}</button> <button onclick='edit(${x.id})'>✎ Uredi</button> <button onclick='deleteInvoice(${x.id})' style='color:#b42318'>🗑 Izbriši</button></td></tr>`;r.innerHTML+=`<tr class='drill' id='drill-${x.id}'><td colspan='9'>${itemDetail(x)}</td></tr>`});if(!list.length)r.innerHTML=`<tr><td colspan='9' class='empty'>Nema računa za odabrane filtere.</td></tr>`;$('unpaid').textContent=money(u);$('overdue').textContent=money(o);$('week').textContent=money(w);$('month30').textContent=money(m30);$('paid').textContent=money(p);$('bottomOverdue').textContent=money(o);$('bottomDebt').textContent=money(u);renderSuppliers();renderMonthly();let supplier=$('filterSupplier').value;$('filterSummary').textContent=(supplier?'Prikaz za: '+supplier+' · ':'')+list.length+' faktura · ukupna vrijednost '+money(list.reduce((a,x)=>a+(+x.total||0),0))}
+
+
+function renderMonthly(){let m=$('monthPick')?.value||'',list=invoices.filter(x=>!m||(x.date||'').startsWith(m));let total=list.reduce((z,x)=>z+x.total,0),paid=list.filter(x=>x.status==='Plaćeno').reduce((z,x)=>z+x.total,0),unpaid=list.filter(x=>x.status!=='Plaćeno').reduce((z,x)=>z+x.total,0),overdue=list.filter(x=>x.status!=='Plaćeno'&&daydiff(x.due)<0).reduce((z,x)=>z+x.total,0),vat=list.reduce((z,x)=>z+x.vat,0);$('mTotal').textContent=money(total);$('mPaid').textContent=money(paid);$('mUnpaid').textContent=money(unpaid);$('mOverdue').textContent=money(overdue);$('mVat').textContent=money(vat);let g={};list.forEach(x=>(g[x.supplier]??=[]).push(x));$('monthSuppliers').innerHTML=Object.keys(g).sort((a,b)=>a.localeCompare(b,'bs')).map(n=>`<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #edf0f3"><b>${n}</b><span>${money(g[n].reduce((z,x)=>z+x.total,0))}</span></div>`).join('')||'<div class="empty">Nema faktura za odabrani mjesec.</div>'}
+let quickMode=null;
+function closeQuick(){quickMode=null;$('quickPanel').classList.remove('on');['unpaid','overdue','week','paid','month'].forEach(x=>$('kpi-'+x)?.classList.remove('active'))}
+function toggleQuick(m){
+  if(quickMode===m){closeQuick();return}
+  quickMode=m;
+  ['unpaid','overdue','week','paid','month'].forEach(x=>$('kpi-'+x)?.classList.toggle('active',x===m));
+  let list=invoices.filter(x=>{let d=daydiff(x.due),p=x.status==='Plaćeno';return m==='unpaid'?!p:m==='overdue'?!p&&d<0:m==='week'?!p&&d>=0&&d<=7:m==='month'?!p&&d>=0&&d<=30:p}).sort((a,b)=>(a.due||'').localeCompare(b.due||''));
+  $('quickTitle').textContent={unpaid:'Svi neplaćeni računi',overdue:'Računi koji kasne',week:'Dospijeva u narednih 7 dana',paid:'Plaćeni računi',month:'Dospijeva u narednih 30 dana'}[m];
+  $('quickList').innerHTML=list.length?`<table><thead><tr><th>DOBAVLJAČ</th><th>RAČUN</th><th>DOSPIJEĆE</th><th>IZNOS</th><th>STATUS</th></tr></thead><tbody>${list.map(x=>`<tr><td><b>${x.supplier}</b></td><td><span class="clickable" onclick="openInvoiceFromQuick(${x.id})">${x.number}</span></td><td>${fmt(x.due)}</td><td><b>${money(x.total)}</b></td><td><span class="badge ${deadlineInfo(x).cls}">${deadlineInfo(x).text}</span></td></tr>`).join('')}</tbody></table>`:'<div class="empty">Nema računa u ovom pregledu.</div>';
+  $('quickPanel').classList.add('on');
+  setTimeout(()=>$('quickPanel').scrollIntoView({behavior:'smooth',block:'start'}),50);
+}
+function openInvoiceFromQuick(id){showTab('inv');let e=$('drill-'+id);if(e&&!e.classList.contains('on'))e.classList.add('on');$('invoicePanel')?.scrollIntoView({behavior:'smooth',block:'start'})}
+function renderSuppliers(){let g={};invoices.forEach(x=>(g[x.supplier]??=[]).push(x));$('supplierGrid').innerHTML=Object.keys(g).sort((a,b)=>a.localeCompare(b,'bs')).map((n,i)=>{let a=g[n],o=a.filter(x=>x.status!=='Plaćeno'),d=o.filter(x=>daydiff(x.due)<0),dug=o.reduce((z,x)=>z+x.total,0),dos=d.reduce((z,x)=>z+x.total,0);return `<div class="supplier-card" onclick="$('supplier-${i}').classList.toggle('on')"><div style="display:flex;justify-content:space-between"><div><b>${n}</b><div class="mini">${o.length} otvorenih faktura</div></div><div style="text-align:right"><div class="mini">Ukupni dug</div><b>${money(dug)}</b><div style="margin-top:8px"><button class="secondary" onclick="event.stopPropagation();exportSupplierExcel('${n.replace(/'/g,"\\'")}')">⬇ Excel</button></div></div></div><div class="supplier-detail" id="supplier-${i}" onclick="event.stopPropagation()"><div class="supplier-stats"><div class="statmini">Ukupna dugovanja<b>${money(dug)}</b></div><div class="statmini">Dospjela<b class="danger">${money(dos)}</b></div><div class="statmini">Nedospjela<b>${money(dug-dos)}</b></div><div class="statmini">Otvoreno<b>${o.length}</b></div></div><table><tbody>${a.sort((x,y)=>(x.due||'').localeCompare(y.due||'')).map(x=>`<tr><td><span class="clickable" onclick="toggleSupplierInvoice(event,${x.id})">${x.number}</span></td><td>${fmt(x.due)}</td><td><b>${money(x.total)}</b></td><td><span class="badge ${deadlineInfo(x).cls}">${deadlineInfo(x).text}</span> <button class="secondary" style="padding:6px 9px;margin-left:6px" onclick="event.stopPropagation();togglePaid(${x.id})">${paymentButtonLabel(x)}</button></td></tr><tr class="drill" id="supplier-invoice-${x.id}"><td colspan="4">${itemDetail(x)}</td></tr>`).join('')}</tbody></table></div></div>`}).join('')}
+
+function toggleSupplierInvoice(ev,id){ev.stopPropagation();let e=$('supplier-invoice-'+id);if(e)e.classList.toggle('on')}
+
+function exportSupplierExcel(name){
+  let list=invoices.filter(x=>x.supplier===name).slice().sort((a,b)=>(a.date||'').localeCompare(b.date||''));
+  if(!list.length)return alert('Nema faktura za ovog dobavljača.');
+  let total=list.reduce((z,x)=>z+Number(x.total||0),0);
+  let unpaid=list.filter(x=>x.status!=='Plaćeno').reduce((z,x)=>z+Number(x.total||0),0);
+  let overdue=list.filter(x=>x.status!=='Plaćeno'&&daydiff(x.due)<0).reduce((z,x)=>z+Number(x.total||0),0);
+  let esc=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  let rows=list.map(x=>`<tr><td>${esc(x.number)}</td><td>${fmt(x.date)}</td><td>${fmt(x.due)}</td><td>${Number(x.net||0).toFixed(2)}</td><td>${Number(x.vat||0).toFixed(2)}</td><td>${Number(x.total||0).toFixed(2)}</td><td>${esc(deadlineInfo(x).text)}</td></tr>`).join('');
+  let html=`<html><head><meta charset="UTF-8"></head><body><h2>SA Investment - ${esc(name)}</h2><table border="1"><tr><th>Broj računa</th><th>Datum</th><th>Dospijeće</th><th>Bez PDV</th><th>PDV</th><th>Ukupno</th><th>Status</th></tr>${rows}<tr><td colspan="5"><b>Ukupna vrijednost</b></td><td><b>${total.toFixed(2)}</b></td><td></td></tr><tr><td colspan="5"><b>Ukupni dug</b></td><td><b>${unpaid.toFixed(2)}</b></td><td></td></tr><tr><td colspan="5"><b>Dospjelo</b></td><td><b>${overdue.toFixed(2)}</b></td><td></td></tr></table></body></html>`;
+  let blob=new Blob(['\ufeff',html],{type:'application/vnd.ms-excel;charset=utf-8'});
+  let a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=('SA_Investment_'+name.replace(/[^a-zA-Z0-9_-]+/g,'_')+'.xls');
+  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+
+function showTab(t){$('invoicePanel').style.display=t==='inv'?'block':'none';$('articlePanel').style.display=t==='art'?'block':'none';$('tabInv').classList.toggle('active',t==='inv');$('tabArt').classList.toggle('active',t==='art');if(t==='art')renderItems()}
+function itemDetail(x){let img=x.imageUrl?`<div style="margin-bottom:12px"><button class="secondary" onclick="openInvoiceImage('${x.imageUrl.replace(/'/g,"\\'")}')">📄 Prikaži račun</button></div>`:'';let items=(!x.items||!x.items.length)?'<div class="empty">Nema očitanih stavki za ovu fakturu.</div>':`<table class="itemtable"><thead><tr><th>ŠIFRA</th><th>MODEL / ARTIKAL</th><th>KOLIČINA</th></tr></thead><tbody>${x.items.map(i=>`<tr><td>${i.code||''}</td><td><b>${i.model}</b></td><td>${i.qty}</td></tr>`).join('')}</tbody></table>`;return img+items}
+function toggleDrill(id){let e=$('drill-'+id);if(e)e.classList.toggle('on')}
+function refreshItemSupplierFilter(){let sel=$('itemSupplier');if(!sel)return;let cur=sel.value,names=[...new Set(invoices.map(x=>x.supplier).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'bs'));sel.innerHTML="<option value=''>Svi dobavljači</option>"+names.map(n=>`<option value="${escHtml(n)}">${escHtml(n)}</option>`).join('');sel.value=cur}
+function normalizeItemCode(v){return String(v||'').trim().toUpperCase().replace(/\s+/g,'')}
+function normalizeItemModel(v){
+  return String(v||'').toUpperCase()
+    .replace(/^VIVAX\s+COOL[,:\s-]*/,'')
+    .replace(/KLIMA\s+UREĐAJ[I]?[,:\s-]*/g,'')
+    .replace(/KLIMA\s+UREDJAJ[I]?[,:\s-]*/g,'')
+    .replace(/\bR32\b/g,' R32 ')
+    .replace(/[,+]/g,' ')
+    .replace(/\s+/g,' ').trim();
+}
+function modelGroupKey(i){
+  let code=normalizeItemCode(i.code);
+  if(code)return 'CODE:'+code;
+  let model=normalizeItemModel(i.model);
+  return 'NAME:'+model;
+}
+function renderItems(){
+  refreshItemSupplierFilter();
+  let supplier=$('itemSupplier')?.value||'',q=($('itemSearch')?.value||'').trim().toLocaleLowerCase('bs'),from=$('itemFrom')?.value||'',to=$('itemTo')?.value||'';
+  let inv=invoices.filter(x=>(!supplier||x.supplier===supplier)&&(!from||x.date>=from)&&(!to||x.date<=to)&&x.items?.length);
+  let map={};
+  inv.forEach(x=>x.items.forEach(i=>{
+    let code=normalizeItemCode(i.code),displayModel=i.model||i.code||'Nepoznat artikal',key=modelGroupKey(i);
+    let search=(code+' '+displayModel).toLocaleLowerCase('bs');if(q&&!search.includes(q))return;
+    if(!map[key])map[key]={model:displayModel,qty:0,codes:new Set(),refs:[],history:[]};
+    if(displayModel && displayModel.length>(map[key].model||'').length)map[key].model=displayModel;
+    if(code)map[key].codes.add(code);
+    map[key].qty+=Number(i.qty||0);
+    map[key].refs.push(x.supplier+' · '+x.number+' ('+fmt(x.date)+')');
+    map[key].history.push({date:x.date,supplier:x.supplier,invoice:x.number,qty:Number(i.qty||0),unitPrice:Number(i.unitPrice||0),total:Number(i.itemTotal||0),code,model:displayModel});
+  }));
+  let arr=Object.values(map).sort((a,b)=>b.qty-a.qty||a.model.localeCompare(b.model,'bs'));
+  $('itemQty').textContent=arr.reduce((a,i)=>a+i.qty,0);$('itemModels').textContent=arr.length;$('itemInvoices').textContent=new Set(inv.map(x=>x.id)).size;$('itemValue').textContent=money(inv.reduce((a,x)=>a+x.total,0));
+  $('modelList').innerHTML=arr.length?arr.map((i,k)=>{
+    let priced=i.history.filter(h=>h.unitPrice>0).sort((a,b)=>a.date.localeCompare(b.date)),prices=priced.map(h=>h.unitPrice),last=priced.length?priced.at(-1).unitPrice:0,min=prices.length?Math.min(...prices):0,max=prices.length?Math.max(...prices):0,first=priced.length?priced[0].unitPrice:0,change=first&&last?((last-first)/first*100):null;
+    let codes=[...i.codes];
+    let summary=prices.length?`<div class="supplier-stats" style="margin-top:10px"><div class="statmini">Zadnja cijena<b>${money(last)}</b></div><div class="statmini">Najniža<b>${money(min)}</b></div><div class="statmini">Najviša<b>${money(max)}</b></div><div class="statmini">Promjena<b class="${change>0?'danger':'ok'}">${change===null?'—':(change>0?'+':'')+change.toFixed(1)+'%'}</b></div></div>`:'';
+    return `<div class='model-card' onclick="toggleHistory(${k})"><div style="width:100%"><div style="display:flex;justify-content:space-between;gap:12px"><div><b>${i.model}</b><div class='mini'>Šifre: ${codes.length?codes.join(', '):'—'} · ${i.refs.join(', ')}</div></div><div style='text-align:right'><div class='qty'>${i.qty}</div><div class='mini'>kom.</div></div></div><div class="history" id="hist-${k}"><b>Istorija nabavne cijene</b>${summary}<table class="itemtable"><thead><tr><th>DATUM</th><th>ŠIFRA</th><th>DOBAVLJAČ</th><th>FAKTURA</th><th>KOL.</th><th>JED. CIJENA</th><th>UKUPNO</th></tr></thead><tbody>${i.history.sort((a,b)=>a.date.localeCompare(b.date)).map(h=>`<tr><td>${fmt(h.date)}</td><td>${h.code||'—'}</td><td>${h.supplier}</td><td>${h.invoice}</td><td>${h.qty}</td><td>${h.unitPrice?money(h.unitPrice):'—'}</td><td>${h.total?money(h.total):'—'}</td></tr>`).join('')}</tbody></table></div></div></div>`;
+  }).join(''):`<div class='empty'>Nema spremljenih artikala za odabrani filter.</div>`;
+}
+function toggleHistory(k){let e=$('hist-'+k);if(e)e.classList.toggle('on')}
+function calculateVat17(){
+  let net=Number($('net').value||0);
+  if(!net){$('vat').value='';$('total').value='';return}
+  let vat=Math.round(net*17)/100;
+  let total=Math.round((net+vat)*100)/100;
+  $('vat').value=vat.toFixed(2);
+  $('total').value=total.toFixed(2);
+}
+function formatDateObj(d){return String(d.getDate()).padStart(2,'0')+'.'+String(d.getMonth()+1).padStart(2,'0')+'.'+d.getFullYear()}function fmt(s){if(!s)return '';let p=s.split('-');return p.length===3?p[2]+'.'+p[1]+'.'+p[0]:s}
+function openForm(){editing=null;pendingOriginalFile=null;pendingItems=[];$('formtitle').textContent='Novi račun';['supplier','number','date','due','net','vat','total'].forEach(i=>$(i).value='');$('status').value='Neplaćeno';$('preview').style.display='none';$('scanNote').textContent='';showEditPage('invoice');renderEditItems();$('modal').classList.add('on')}
+function closeForm(){$('modal').classList.remove('on')}
+function showEditPage(page){let inv=page==='invoice';$('editPageInvoice').classList.toggle('active',inv);$('editPageItems').classList.toggle('active',!inv);$('editTabInvoice').classList.toggle('active',inv);$('editTabItems').classList.toggle('active',!inv);if(!inv)renderEditItems()}
+function addEditItem(){pendingItems.push({code:'',name:'',quantity:1,unit_price:0,total:0});renderEditItems()}
+function removeEditItem(i){pendingItems.splice(i,1);renderEditItems()}
+function updateEditItem(i,field,value){
+  let x=pendingItems[i];if(!x)return;
+  if(['quantity','unit_price','total'].includes(field))value=Number(value||0);
+  x[field]=value;
+  if(field==='quantity'||field==='unit_price')x.total=Math.round(Number(x.quantity||0)*Number(x.unit_price||0)*100)/100;
+  renderEditItems(false);
+}
+function renderEditItems(rebuild=true){
+  let box=$('editItemsList');if(!box)return;
+  if(rebuild){
+    box.innerHTML=pendingItems.length?pendingItems.map((i,k)=>`<div class="item-edit-row">
+      <label>Šifra<input value="${escHtml(i.code||'')}" onchange="updateEditItem(${k},'code',this.value)"></label>
+      <label class="item-name">Model / artikal<input value="${escHtml(i.name||'')}" onchange="updateEditItem(${k},'name',this.value)"></label>
+      <label>Količina<input type="number" step="0.01" value="${Number(i.quantity||0)}" onchange="updateEditItem(${k},'quantity',this.value)"></label>
+      <label>Jed. cijena<input type="number" step="0.01" value="${Number(i.unit_price||0).toFixed(2)}" onchange="updateEditItem(${k},'unit_price',this.value)"></label>
+      <label>Ukupno<input type="number" step="0.01" value="${Number(i.total||0).toFixed(2)}" onchange="updateEditItem(${k},'total',this.value)"></label>
+      <button type="button" class="secondary item-delete" style="color:#b42318" onclick="removeEditItem(${k})">🗑</button>
+    </div>`).join(''):'<div class="empty">Nema stavki. Klikni “Dodaj stavku” za ručni unos.</div>';
+  }
+  let sum=pendingItems.reduce((z,i)=>z+Number(i.total||0),0),invoiceTotal=Number($('total')?.value||0),diff=Math.abs(sum-invoiceTotal);
+  $('editItemsTotal').textContent=money(sum);$('editItemCount').textContent='('+pendingItems.length+')';
+  let check=$('editItemsCheck');
+  if(!pendingItems.length){check.className='item-check';check.textContent='Na računu nema spremljenih stavki.'}
+  else if(diff<1){check.className='item-check okcheck';check.textContent='✓ Zbir stavki odgovara ukupnom iznosu računa.'}
+  else{check.className='item-check warncheck';check.textContent='⚠ Zbir stavki ('+money(sum)+') ne odgovara ukupnom iznosu računa ('+money(invoiceTotal)+'). Razlika: '+money(diff)}
+}
+
+let pendingOriginalFile=null;
+let pendingItems=[];
+
+async function uploadInvoiceImage(file, supplier, invoiceNumber){
+  let sess=getSession(); if(!sess?.access_token)throw new Error('Nisi prijavljen.');
+  let safeSupplier=(supplier||'dobavljac').replace(/[^a-zA-Z0-9_-]+/g,'_');
+  let safeNumber=(invoiceNumber||Date.now()).replace(/[^a-zA-Z0-9_-]+/g,'_');
+  let ext=(file.name.split('.').pop()||'jpg').toLowerCase().replace(/[^a-z0-9]/g,'')||'jpg';
+  let path=`${new Date().getFullYear()}/${safeSupplier}/${safeNumber}_${Date.now()}.${ext}`;
+  let r=await fetch(SUPABASE_URL+'/storage/v1/object/racuni/'+path,{
+    method:'POST',
+    headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sess.access_token,'Content-Type':file.type||'image/jpeg','x-upsert':'false'},
+    body:file
+  });
+  if(!r.ok){let j=await r.json().catch(()=>({}));throw new Error(j.message||j.error||'Ne mogu spremiti fotografiju računa.')}
+  return path;
+}
+async function openInvoiceImage(path){
+  try{
+    let sess=getSession(); if(!sess?.access_token)throw new Error('Nisi prijavljen.');
+    let r=await fetch(SUPABASE_URL+'/storage/v1/object/sign/racuni/'+path,{
+      method:'POST',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sess.access_token,'Content-Type':'application/json'},
+      body:JSON.stringify({expiresIn:300})
+    });
+    let j=await r.json(); if(!r.ok)throw new Error(j.message||'Ne mogu otvoriti račun.');
+    window.open(SUPABASE_URL+'/storage/v1'+j.signedURL,'_blank');
+  }catch(e){alert(e.message)}
+}
+
+async function saveInvoice(){
 try{
- const z=JSON.parse(localStorage.getItem('plRates')||'null');
- if(z){EUR_USD=z.EUR_USD||EUR_USD;EUR_SEK=z.EUR_SEK||EUR_SEK;EUR_HUF=z.EUR_HUF||EUR_HUF;EUR_RSD=z.EUR_RSD||EUR_RSD;}
-}catch(_){}
-camera().then(()=>refreshRates());
-if('serviceWorker' in navigator){navigator.serviceWorker.register('/service-worker.js');}
-window.addEventListener('offline',()=>statusEl.textContent='OFFLINE — kamera/OCR rade sa spremljenim resursima; koristim zadnje kurseve.');
-window.addEventListener('online',()=>{statusEl.textContent='Online — osvježavam kurseve.';refreshRates();});
-</script>
-</body>
-</html>
+ let sess=getSession();if(!sess?.access_token)throw new Error('Nisi prijavljen.');
+ let name=$('supplier').value.trim(),num=$('number').value.trim(),invDate=$('date').value,total=+$('total').value;
+ if(!name||!num||!invDate||!total)throw new Error('Provjeri dobavljača, broj računa, datum i ukupni iznos.');
+ let norm=v=>String(v||'').toLowerCase().replace(/\s+/g,'').replace(/[._-]/g,'/');
+ let localDup=invoices.find(x=>norm(x.supplier)===norm(name)&&norm(x.number)===norm(num)&&x.id!==editing);
+ if(localDup){alert('⚠️ DUPLA FAKTURA\n\nRačun '+num+' dobavljača '+name+' već postoji u bazi.\nDatum: '+fmt(localDup.date)+'\nIznos: '+money(localDup.total)+'\n\nPromjena NIJE spremljena.');return}
+ let h={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sess.access_token,'Content-Type':'application/json','Prefer':'return=representation'};
+ let sr=await fetch(SUPABASE_URL+'/rest/v1/suppliers?select=id&name=eq.'+encodeURIComponent(name),{headers:h}),ss=await sr.json(),sid;
+ if(!sr.ok)throw new Error(ss.message||'Greška dobavljača.');
+ if(ss.length)sid=ss[0].id;else{let rr=await fetch(SUPABASE_URL+'/rest/v1/suppliers',{method:'POST',headers:h,body:JSON.stringify({name})}),jj=await rr.json();if(!rr.ok)throw new Error(jj.message);sid=jj[0].id}
+ let er=await fetch(SUPABASE_URL+'/rest/v1/invoices?select=id,invoice_number,invoice_date,total_amount&supplier_id=eq.'+sid+'&invoice_number=eq.'+encodeURIComponent(num),{headers:h}),exact=await er.json();
+ if(!er.ok)throw new Error(exact.message||'Greška provjere duplikata.');
+ if(exact.some(d=>d.id!==editing)){let d=exact.find(d=>d.id!==editing);alert('⚠️ DUPLA FAKTURA\n\nRačun '+num+' dobavljača '+name+' već postoji.\nDatum: '+fmt(d.invoice_date)+'\nIznos: '+money(d.total_amount));return}
+ let imagePath=(typeof pendingOriginalFile!=='undefined'&&pendingOriginalFile)?await uploadInvoiceImage(pendingOriginalFile,name,num):null;
+ let statusMap={'Plaćeno':'placeno','Djelimično':'djelimicno','Neplaćeno':'neplaceno'};
+ let payload={supplier_id:sid,invoice_number:num,invoice_date:invDate,due_date:$('due').value||null,net_amount:+$('net').value,vat_amount:+$('vat').value,total_amount:total,currency:'BAM',status:statusMap[$('status').value]||'neplaceno'};
+ if(imagePath)payload.image_url=imagePath;
+ if(editing){
+    let r=await authFetch(SUPABASE_URL+'/rest/v1/invoices?id=eq.'+editing,{method:'PATCH',headers:{'Content-Type':'application/json','Prefer':'return=minimal'},body:JSON.stringify(payload)});
+    let txt=await r.text();if(!r.ok){let e={};try{e=JSON.parse(txt)}catch(_){ }throw new Error(e.message||'Ne mogu spremiti izmjene računa.')}
+
+    let dr=await authFetch(SUPABASE_URL+'/rest/v1/invoice_items?invoice_id=eq.'+editing,{method:'DELETE',headers:{'Content-Type':'application/json','Prefer':'return=minimal'}});
+    let dtxt=await dr.text();if(!dr.ok){let e={};try{e=JSON.parse(dtxt)}catch(_){ }throw new Error(e.message||'Račun je spremljen, ali stare stavke nisu mogle biti zamijenjene.')}
+
+    let rows=pendingItems.filter(i=>(i.name||'').trim()||(i.code||'').trim()).map(i=>({
+      invoice_id:editing,
+      product_code:(i.code||'').trim()||null,
+      product_name:(i.name||'').trim()||(i.code||'Artikal'),
+      quantity:Number(i.quantity||0),
+      unit:'kom',
+      unit_price:Number(i.unit_price||0)||null,
+      total_amount:Number(i.total||0)||null
+    }));
+
+    if(rows.length){
+      let ir=await authFetch(SUPABASE_URL+'/rest/v1/invoice_items',{method:'POST',headers:{'Content-Type':'application/json','Prefer':'return=representation'},body:JSON.stringify(rows)});
+      let ij=await ir.json().catch(()=>null);if(!ir.ok)throw new Error(ij?.message||'Izmijenjene stavke nisu mogle biti spremljene.');
+    }
+
+    let verify=await apiGet('invoice_items?select=product_code,product_name,quantity,unit_price,total_amount&invoice_id=eq.'+editing);
+    if(verify.length!==rows.length)throw new Error('Spremanje stavki nije potvrđeno. Osvježi podatke i pokušaj ponovo.');
+
+    closeForm();await loadFromSupabase();await markScannedProcessed();alert('Izmjene računa i stavki su spremljene.');return;
+ }
+ let r=await fetch(SUPABASE_URL+'/rest/v1/invoices',{method:'POST',headers:h,body:JSON.stringify(payload)}),j=await r.json();if(!r.ok)throw new Error(j.message);
+ let newInvoiceId=Array.isArray(j)&&j[0]?j[0].id:null;
+ if(newInvoiceId&&pendingItems.length){let rows=pendingItems.filter(i=>i.name).map(i=>({invoice_id:newInvoiceId,product_code:i.code||null,product_name:i.name,quantity:Number(i.quantity||0),unit:'kom',unit_price:Number(i.unit_price||0)||null,total_amount:Number(i.total||0)||null}));if(rows.length){let ir=await fetch(SUPABASE_URL+'/rest/v1/invoice_items',{method:'POST',headers:h,body:JSON.stringify(rows)});let ij=await ir.json().catch(()=>null);if(!ir.ok)throw new Error(ij?.message||'Račun je spremljen, ali stavke nisu.');}}
+ closeForm();await loadFromSupabase();await markScannedProcessed();alert('Račun spremljen.');
+}catch(e){alert(e.message)}
+}
+async function togglePaid(id){
+  try{
+    let x=invoices.find(a=>a.id===id);if(!x)return;
+    let sess=getSession();if(!sess?.access_token)throw new Error('Nisi prijavljen.');
+    let makingPaid=x.status!=='Plaćeno';
+    if(makingPaid&&!confirm('Označiti račun '+x.number+' kao PLAĆEN?'))return;
+    let r=await fetch(SUPABASE_URL+'/rest/v1/invoices?id=eq.'+id,{
+      method:'PATCH',
+      headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sess.access_token,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body:JSON.stringify({status:makingPaid?'placeno':'neplaceno',payment_date:makingPaid?new Date().toISOString().slice(0,10):null})
+    });
+    let j=await r.text();if(!r.ok){let e={};try{e=JSON.parse(j)}catch(_){ }throw new Error(e.message||'Ne mogu promijeniti status računa.')}
+    await loadFromSupabase();
+  }catch(e){alert(e.message)}
+}function edit(id){
+  let x=invoices.find(a=>a.id===id);if(!x)return;
+  editing=id;pendingOriginalFile=null;pendingItems=(x.items||[]).map(i=>({id:i.id,code:i.code||'',name:i.model||'',quantity:Number(i.qty||0),unit_price:Number(i.unitPrice||0),total:Number(i.itemTotal||0)}));
+  $('supplier').value=x.supplier;$('number').value=x.number;$('date').value=x.date;$('due').value=x.due;
+  $('net').value=Number(x.net||0).toFixed(2);$('vat').value=Number(x.vat||0).toFixed(2);$('total').value=Number(x.total||0).toFixed(2);
+  $('status').value=x.status;$('formtitle').textContent='Uredi račun '+x.number;
+  $('preview').style.display='none';$('scanNote').textContent='';showEditPage('invoice');renderEditItems();$('modal').classList.add('on');
+}
+async function deleteInvoice(id){
+ try{
+  let x=invoices.find(a=>a.id===id);if(!x)return;
+  if(!confirm('TRAJNO IZBRISATI FAKTURU?\n\n'+x.supplier+'\nRačun: '+x.number+'\nIznos: '+money(x.total)+'\n\nOva radnja se ne može poništiti.'))return;
+  let sess=getSession();if(!sess?.access_token)throw new Error('Nisi prijavljen.');
+  let h={'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sess.access_token,'Content-Type':'application/json','Prefer':'return=minimal'};
+  let ir=await fetch(SUPABASE_URL+'/rest/v1/invoice_items?invoice_id=eq.'+id,{method:'DELETE',headers:h});
+  if(!ir.ok){let j=await ir.json().catch(()=>({}));throw new Error(j.message||'Ne mogu izbrisati stavke fakture.')}
+  let r=await fetch(SUPABASE_URL+'/rest/v1/invoices?id=eq.'+id,{method:'DELETE',headers:h});
+  if(!r.ok){let j=await r.json().catch(()=>({}));throw new Error(j.message||'Ne mogu izbrisati fakturu.')}
+  if(x.imageUrl){
+    let sr=await fetch(SUPABASE_URL+'/storage/v1/object/racuni/'+x.imageUrl,{method:'DELETE',headers:{'apikey':SUPABASE_KEY,'Authorization':'Bearer '+sess.access_token}});
+    if(!sr.ok)console.warn('Fotografija nije izbrisana iz arhive.');
+  }
+  await loadFromSupabase();alert('Faktura je izbrisana.');
+ }catch(e){alert(e.message)}
+}
+
+async function optimizeInvoiceImage(file){
+  const bitmap = await createImageBitmap(file);
+  const maxSide = 1900;
+  let w=bitmap.width,h=bitmap.height;
+  const scale=Math.min(1,maxSide/Math.max(w,h));
+  w=Math.max(1,Math.round(w*scale)); h=Math.max(1,Math.round(h*scale));
+  const canvas=document.createElement('canvas');
+  canvas.width=w; canvas.height=h;
+  const ctx=canvas.getContext('2d',{alpha:false});
+  ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h);
+  ctx.imageSmoothingEnabled=true; ctx.imageSmoothingQuality='high';
+  ctx.drawImage(bitmap,0,0,w,h); bitmap.close?.();
+  return canvas.toDataURL('image/jpeg',0.90);
+}
+
+
+/* ===== SCANNED INVOICES MODULE ===== */
+let scannedInvoices=[];
+let pendingScannedQueueId=null;
+
+function toggleScanInbox(){
+  let p=$('scanInboxPanel');p.classList.toggle('on');
+  if(p.classList.contains('on'))loadScannedInvoices();
+}
+async function loadScannedInvoices(){
+  let box=$('scanInboxList');
+  box.innerHTML='<div class="empty">Provjeravam mailbox i AI obradu…</div>';
+  try{
+    let r=await fetch('/api/scanned-invoices',{method:'GET',headers:{'Accept':'application/json'}});
+    let j=await r.json();if(!r.ok)throw new Error(j.error||'Ne mogu učitati skenirane fakture.');
+    scannedInvoices=Array.isArray(j.items)?j.items:[];
+    $('scanInboxCount').textContent=scannedInvoices.length;
+    renderScannedInvoices();
+  }catch(e){
+    box.innerHTML='<div class="empty"><b>Skenirani mailbox nije dostupan.</b><br>'+escHtml(e.message)+'</div>';
+  }
+}
+function renderScannedInvoices(){
+  let box=$('scanInboxList');
+  if(!scannedInvoices.length){box.innerHTML='<div class="empty">Nema novih skeniranih faktura koje čekaju provjeru.</div>';return}
+  box.innerHTML=scannedInvoices.map((x,i)=>{
+    let state=x.status==='ready'?'<span class="scan-state scan-ready">AI očitano</span>':x.status==='error'?'<span class="scan-state scan-error">Greška</span>':'<span class="scan-state">Obrada</span>';
+    return `<div class="scan-row">
+      <div class="scan-main"><b>${escHtml(x.supplier||x.filename||'Skenirana faktura')}</b><div class="mini">${escHtml(x.invoice_number||'Broj još nije očitan')} · ${fmt(x.invoice_date||'')}</div></div>
+      <div><div class="mini">Ukupno</div><b>${x.total?money(x.total):'—'}</b></div>
+      <div>${state}</div>
+      <div class="scan-action"><button class="primary" ${x.status!=='ready'?'disabled':''} onclick="reviewScannedInvoice(${i})">Pregledaj</button></div>
+    </div>`;
+  }).join('');
+}
+function reviewScannedInvoice(i){
+  let x=scannedInvoices[i];if(!x||x.status!=='ready')return;
+  openForm();
+  pendingScannedQueueId=x.id||null;
+  $('supplier').value=x.supplier||'';
+  $('number').value=x.invoice_number||'';
+  $('date').value=x.invoice_date||'';
+  $('due').value=x.due_date||'';
+  $('net').value=Number(x.subtotal||0).toFixed(2);
+  $('vat').value=Number(x.vat||0).toFixed(2);
+  $('total').value=Number(x.total||0).toFixed(2);
+  $('status').value='Neplaćeno';
+  pendingItems=(Array.isArray(x.items)?x.items:[]).map(a=>({
+    code:a.code||'',name:a.name||a.product_name||'',quantity:Number(a.quantity||0),
+    unit_price:Number(a.unit_price||0),total:Number(a.total||a.total_amount||0)
+  }));
+  renderEditItems();
+  $('scanNote').innerHTML='<b>🖨 Skenirana faktura.</b> AI podaci su popunjeni. Provjeri podatke i stavke pa klikni Spremi račun.';
+}
+async function markScannedProcessed(){
+  if(!pendingScannedQueueId)return;
+  let id=pendingScannedQueueId;pendingScannedQueueId=null;
+  try{
+    await fetch('/api/scanned-invoices',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({id,action:'processed'})});
+    loadScannedInvoices();
+  }catch(_){}
+}
+
+$('scan').addEventListener('change',async e=>{let f=e.target.files[0];if(!f)return;openForm();pendingOriginalFile=f;try{if(!f.type.startsWith('image/'))throw new Error('Za sada koristi JPG/PNG fotografiju računa.');$('preview').src=URL.createObjectURL(f);$('preview').style.display='block';$('aiProgress').style.display='block';$('scanNote').textContent='AI analizira račun…';$('scanNote').textContent='Optimiziram fotografiju za precizno AI očitavanje…';let image=await optimizeInvoiceImage(f);let r=await fetch('/api/analyze-invoice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({image})});let j=await r.json();if(!r.ok)throw new Error(j.error||'AI analiza nije uspjela.');$('supplier').value=j.supplier||'';$('number').value=j.invoice_number||'';$('date').value=j.invoice_date||'';$('due').value=j.due_date||'';$('net').value=Number(j.subtotal||0).toFixed(2);$('vat').value=Number(j.vat||0).toFixed(2);$('total').value=Number(j.total||0).toFixed(2);$('status').value='Neplaćeno';pendingItems=(Array.isArray(j.items)?j.items:[]).map(i=>({code:i.code||'',name:i.name||i.product_name||'',quantity:Number(i.quantity||0),unit_price:Number(i.unit_price||0),total:Number(i.total||i.total_amount||0)}));renderEditItems();$('scanNote').innerHTML='<b>✓ AI je očitao račun.</b> Provjeri podatke i stavke prije spremanja.';}catch(err){$('scanNote').innerHTML='<span style="color:#b42318"><b>Greška:</b> '+err.message+'</span>'}finally{$('aiProgress').style.display='none';e.target.value=''}});
+
+(async()=>{let sess=getSession();if(sess?.access_token){$('loginGate').style.display='none';await loadFromSupabase();}else{$('loginGate').style.display='flex';render();}})();
+</script></body></html>
+

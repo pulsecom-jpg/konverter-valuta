@@ -1,0 +1,10 @@
+Vercel Environment Variables (NE stavljati u GitHub):
+IMAP_HOST=mail.sainvestment.ba
+IMAP_PORT=993
+IMAP_SECURE=true
+IMAP_USER=<tačna email adresa mailboxa>
+IMAP_PASSWORD=<nova lozinka mailboxa>
+SUPABASE_URL=https://skazwbxgenuyehpbcugr.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=<Supabase service_role key>
+OPENAI_API_KEY=<isti OpenAI API key koji koristi postojeći AI backend>
+OPENAI_INVOICE_MODEL=gpt-5.6-luna
